@@ -1,0 +1,170 @@
+#
+#  /$$$$$$               /$$                                          /$$
+# |_  $$_/              | $$                                         | $$
+#   | $$  /$$$$$$$  /$$$$$$$ /$$$$$$  /$$$$$$  /$$$$$$ /$$$$$$$  /$$$$$$$ /$$$$$$ /$$$$$$$  /$$$$$$$ /$$$$$$
+#   | $$ | $$__  $$/$$__  $$/$$__  $$/$$__  $$/$$__  $| $$__  $$/$$__  $$/$$__  $| $$__  $$/$$_____//$$__  $$
+#   | $$ | $$  \ $| $$  | $| $$$$$$$| $$  \ $| $$$$$$$| $$  \ $| $$  | $| $$$$$$$| $$  \ $| $$     | $$$$$$$$
+#   | $$ | $$  | $| $$  | $| $$_____| $$  | $| $$_____| $$  | $| $$  | $| $$_____| $$  | $| $$     | $$_____/
+#  /$$$$$| $$  | $|  $$$$$$|  $$$$$$| $$$$$$$|  $$$$$$| $$  | $|  $$$$$$|  $$$$$$| $$  | $|  $$$$$$|  $$$$$$$
+# |______|__/  |__/\_______/\_______| $$____/ \_______|__/  |__/\_______/\_______|__/  |__/\_______/\_______/
+#                                   | $$
+#   /$$$$$$                /$$/$$   | $$                   /$$$$$$ /$$         /$$
+#  /$$__  $$              | $|__/   |__/                  /$$__  $| $$        | $$
+# | $$  \__/ /$$$$$$  /$$$$$$$/$$/$$$$$$$  /$$$$$$       | $$  \__| $$/$$   /$| $$$$$$$
+# | $$      /$$__  $$/$$__  $| $| $$__  $$/$$__  $$      | $$     | $| $$  | $| $$__  $$
+# | $$     | $$  \ $| $$  | $| $| $$  \ $| $$  \ $$      | $$     | $| $$  | $| $$  \ $$
+# | $$    $| $$  | $| $$  | $| $| $$  | $| $$  | $$      | $$    $| $| $$  | $| $$  | $$
+# |  $$$$$$|  $$$$$$|  $$$$$$| $| $$  | $|  $$$$$$$      |  $$$$$$| $|  $$$$$$| $$$$$$$/
+#  \______/ \______/ \_______|__|__/  |__/\____  $$       \______/|__/\______/|_______/
+#                                         /$$  \ $$
+#                                        |  $$$$$$/
+#                                         \______/
+#
+#-------------------------------------------------------------------------------
+# Name:        CNN Student News Autobump
+# Purpose:     Automatically adds comments to page once per day at specified
+#              time window, comments stored in text file in path folder
+# Author:      Coding Club: Shawn Hill, Eric Wiliks, Youssef Gerges
+# Created:     01/09/2016
+# Copyright:   (c) Shawn 2016
+#-------------------------------------------------------------------------------
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+import time
+from random import randint
+import sys
+import os
+
+#Functions for simplicity
+#Detect multilines in Unicode and write them
+def add_multiline(a):
+  multiline = a
+  while a.find(r'\n') != -1:
+    inch = a.find(r'\n')
+    multiline = a[0:inch] + "\n" + a[inch+2:len(foo)]
+  return multiline
+#Get the current time
+def check_the_current_time():
+  return time.ctime().lower()
+
+def check_the_tuple_time():
+  return tuple(time.localtime())
+
+def post_comment(comment_from_list):
+  browser = webdriver.Ie() # Get local session of browser
+  browser.get("http://www.cnn.com/login.html") # Load page
+  time.sleep(2)
+  username_box = browser.find_element_by_id("msib-login-id")
+  password_box = browser.find_element_by_id("msib-password")
+  username_box.send_keys(username)
+  password_box.send_keys(password)
+  browser.find_element_by_xpath("//*[@id='msib-login']").click()
+  time.sleep(5) # Let the page load
+  browser.get(post_url) #Now the good stuff
+  time.sleep(3)
+  comment_field = browser.find_element_by_xpath("//*[@id='fyre-editor-15']")
+  comment_field.send_keys(comment_from_list)
+  browser.find_elements_by_xpath("//*[@id=':c9']").click()
+
+def retrieve_comment(file_name):
+  try:
+    the_file = open(file_name,'r')
+    the_comment = the_file.read()
+    the_file.close()
+  except Exception:
+    the_comment = add_multiline(raw_input("Enter first post"))
+    the_file = open(file_name,'w')
+    the_file.write(the_comment)
+    the_file.close()
+  return the_comment
+
+def refresh_all_values():
+  current_time = check_the_current_time()
+  time_tup = check_the_tuple_time()
+  day = str(check_the_tuple_time()[2])
+  month = str(check_the_tuple_time()[1])
+  day_of_week = check_the_current_time()[0:3]
+  dpos = 0
+  day_post_range = ["sun", "mon", "tue", "wed", "thu"]
+  d_of_wk_url = ["mon", "tues", "weds", "thurs", "fri"]
+  for x in range(5):
+    if day_post_range[x] == current_time[0:3]:
+      dpos = x
+  upload_day_and_month = "0" + day + "/"+ "0" + month
+  if upload_day_and_month[2] != "/":
+    upload_day_and_month = upload_day_and_month[1:6]
+  post_url = "http://www.cnn.com/2016/" + upload_day_and_month + "/studentnews/sn-content-" + d_of_wk_url[dpos] + "/index.html"
+
+def refresh_time_values():
+  current_time = check_the_current_time()
+  time_tup = check_the_tuple_time()
+  day_of_week = check_the_current_time()[0:3]
+
+#The Main Event
+life = 1
+death = 0
+rand_min = randint(0,59)
+number_of_comments = int(raw_input("How many comments would you like?"))
+comment_list = []
+for x in range(1,number_of_comments + 1):
+  comment_list.append(retrieve_comment("comment"+str(x)+".txt"))
+current_time = check_the_current_time()
+time_tup = list(check_the_tuple_time())
+day = str(check_the_tuple_time()[2])
+month = str(check_the_tuple_time()[1])
+day_of_week = check_the_current_time()[0:3]
+#Get day of week for URL
+dpos = 0
+day_post_range = ["sun", "mon", "tue", "wed", "thu"]
+d_of_wk_url = ["mon", "tues", "weds", "thurs", "fri"]
+for x in range(5):
+  if day_post_range[x] == current_time[0:3]:
+    dpos = x
+#Define URL entry for post of video date
+upload_day_and_month = "0" + day + "/"+ "0" + month
+if upload_day_and_month[2] != "/":
+  upload_day_and_month = upload_day_and_month[1:6]
+#Finally, concatenate
+#Example URL: http://www.cnn.com/2016/01/03/studentnews/sn-content-mon/index.html
+post_url = "http://www.cnn.com/2016/" + upload_day_and_month + "/studentnews/sn-content-" + d_of_wk_url[dpos] + "/index.html"
+
+#Check for config file. Make one and prompt user if not made yet.
+try:#Try to get the config file
+  config = open('config.txt','r')
+  post_time = config.readline().rstrip()
+  username = config.readline().rstrip()
+  password = config.readline().rstrip()
+  config.close()
+except Exception:#If there's no config file, get the data manually
+  config = open('config.txt','w')
+  post_time = raw_input("Enter the hour to post the comment in 24-hour format")
+  config.write(post_time + "\n")
+  username = raw_input("Enter your username")
+  config.write(username + "\n")
+  password = raw_input("Enter your password")
+  config.write(password)
+  config.close()
+
+flippity_floppity = 0
+while life > death:
+  if str(post_time) == str(time_tup[3]) and str(rand_min) == str(time_tup[4]): #if the time is right
+    refresh_all_values()
+    post_comment(comment_list[randint(0,number_of_comments-1)]) #if so, wake up and post!
+    rand_min = randint(0,59)
+  else: #if we're not doing anything, change a number to true and false in boredom
+    flippity_floppity += 1
+    hours_to_go = int(post_time) - time_tup[3]
+    if hours_to_go < 0:
+      hours_to_go += 24
+    minutes_to_go = rand_min - time_tup[4]
+    if minutes_to_go < 0:
+      minutes_to_go += 60
+    os.system('cls' if os.name == 'nt' else 'clear')
+    to_post_time = post_time.rstrip() +":"+ str(rand_min)
+    sys.stdout.write("\r"+str(flippity_floppity % 2)+"\n"+check_the_current_time() +"\nThe time you selected to post is: " + to_post_time + "\nTime until next posting: " + str(hours_to_go) + " hours " + str(minutes_to_go) + " minutes")
+    sys.stdout.flush()
+    refresh_time_values()
+    time.sleep(1)

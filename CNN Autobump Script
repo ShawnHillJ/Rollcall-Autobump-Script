@@ -39,7 +39,6 @@ import sys
 import os
 
 #Functions for simplicity
-#Detect multilines in Unicode and write them
 def add_multiline(a):
   multiline = a
   while a.find(r'\n') != -1:
@@ -75,7 +74,7 @@ def retrieve_comment(file_name):
     the_comment = the_file.read()
     the_file.close()
   except Exception:
-    the_comment = add_multiline(raw_input("Enter first post"))
+    the_comment = add_multiline(raw_input("Enter your comment post:"))
     the_file = open(file_name,'w')
     the_file.write(the_comment)
     the_file.close()
@@ -107,10 +106,7 @@ def refresh_time_values():
 life = 1
 death = 0
 rand_min = randint(0,59)
-number_of_comments = int(raw_input("How many comments would you like?"))
 comment_list = []
-for x in range(1,number_of_comments + 1):
-  comment_list.append(retrieve_comment("comment"+str(x)+".txt"))
 current_time = check_the_current_time()
 time_tup = list(check_the_tuple_time())
 day = str(check_the_tuple_time()[2])
@@ -137,29 +133,35 @@ try:#Try to get the config file
   post_time = config.readline().rstrip()
   username = config.readline().rstrip()
   password = config.readline().rstrip()
+  number_of_comments = config.readline().rstrip()
   config.close()
 except Exception:#If there's no config file, get the data manually
   config = open('config.txt','w')
-  post_time = raw_input("Enter the hour to post the comment in 24-hour format")
+  post_time = raw_input("Enter just the hour to post the comment in 24-hour format, like 12, 5, or 22:")
   config.write(post_time + "\n")
-  username = raw_input("Enter your username")
+  username = raw_input("Enter your username:")
   config.write(username + "\n")
-  password = raw_input("Enter your password")
+  password = raw_input("Enter your password:")
   config.write(password)
+  number_of_comments = raw_input("How many comments would you like to import?:")
+  config.write(number_of_comments)
   config.close()
+
+for x in range(1,int(number_of_comments) + 1):
+  comment_list.append(retrieve_comment("comment"+str(x)+".txt"))
 
 flippity_floppity = 0
 while life > death:
   if str(post_time) == str(time_tup[3]) and str(rand_min) == str(time_tup[4]): #if the time is right
     refresh_all_values()
-    post_comment(comment_list[randint(0,number_of_comments-1)]) #if so, wake up and post!
+    post_comment(comment_list[randint(0,int(number_of_comments)-1)]) #if so, wake up and post!
     rand_min = randint(0,59)
   else: #if we're not doing anything, change a number to true and false in boredom
     flippity_floppity += 1
-    hours_to_go = int(post_time) - time_tup[3]
+    hours_to_go = int(post_time) - list(check_the_tuple_time())[3]
     if hours_to_go < 0:
       hours_to_go += 24
-    minutes_to_go = rand_min - time_tup[4]
+    minutes_to_go = rand_min - list(check_the_tuple_time())[4]
     if minutes_to_go < 0:
       minutes_to_go += 60
     os.system('cls' if os.name == 'nt' else 'clear')
